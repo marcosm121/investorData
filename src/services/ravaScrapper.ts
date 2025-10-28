@@ -27,9 +27,12 @@ export class RavaScrapper {
 
     // Función para obtener el precio de un ticker
     const getPriceForTicker = async (ticker: string) => {
+      // console.log("pegando a ticker: " + ticker);
       const response = await axios.get("https://www.rava.com/perfil/" + ticker);
       let res = response.data.toString();
-      let pos = res.search(expresion);
+      // let pos = res.search(expresion);
+      const pos = res.lastIndexOf(expresion);
+      if (pos === -1) return "0";
       res = res.substring(pos + 13, pos + 22);
       res = res.substring(0, res.search(","));
       return res;
@@ -55,4 +58,3 @@ export class RavaScrapper {
     }
   }
 }
-
