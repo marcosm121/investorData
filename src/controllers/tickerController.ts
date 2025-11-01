@@ -31,7 +31,9 @@ export class TickerController {
       "bolsa",
       "contadoconliqui",
     ]);
-    return { ...prices, ...dolares };
+    const resultado = { ...prices, ...dolares };
+    console.log(resultado);
+    return resultado;
   }
 
   /**
@@ -57,9 +59,15 @@ export class TickerController {
   getManyCsv = async (req: Request, res: Response): Promise<void> => {
     try {
       const data = await this.getData();
-      const headers = "Ticker,Valor\n";
-      const rows = Object.entries(data)
-        .map(([ticker, valor]) => `${ticker},${valor}`)
+      const dataFormateada = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [
+          key,
+          String(value).replace(/\./g, ","),
+        ])
+      );
+      const headers = "Ticker;Valor\n";
+      const rows = Object.entries(dataFormateada)
+        .map(([ticker, valor]) => `${ticker};${valor}`)
         .join("\n");
 
       const csv = headers + rows;

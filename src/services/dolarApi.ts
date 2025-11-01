@@ -24,7 +24,10 @@ export class DolarAPI {
       if (prices) {
         for (let dolar of dolares) {
           const aux = prices.find((item) => item.casa === dolar);
-          if (aux) result[dolar] = (aux?.compra + aux?.venta) / 2;
+          if (aux) {
+            const averaged = (aux?.compra + aux?.venta) / 2;
+            result[dolar] = Number(averaged.toFixed(2)); //Redondeo a 2 decimales
+          }
         }
       }
       return result;
