@@ -29,13 +29,28 @@ export class RavaScrapper {
     const getPriceForTicker = async (ticker: string) => {
       // console.log("pegando a ticker: " + ticker);
       const response = await axios.get("https://www.rava.com/perfil/" + ticker);
-      let res = response.data.toString();
-      // let pos = res.search(expresion);
-      const pos = res.lastIndexOf(expresion);
-      if (pos === -1) return "0";
-      res = res.substring(pos + 13, pos + 22);
-      res = res.substring(0, res.search(","));
-      return res;
+      const res = response.data.toString();
+      let pos;
+      let price;
+      // Calculo ultimo precio
+      const lastPos = res.lastIndexOf(expresion);
+      if (lastPos === -1) return "0";
+      let lastPrice = res.substring(lastPos + 13, lastPos + 22);
+      lastPrice = lastPrice.substring(0, lastPrice.search(","));
+      // Calculo penultimo precio
+      const secondLastPos = res.lastIndexOf(expresion, lastPos - 1);
+      if (secondLastPos === -1) return lastPrice;
+      let secondLastPrice = res.substring(
+        secondLastPos + 13,
+        secondLastPos + 22
+      );
+      secondLastPrice = secondLastPrice.substring(
+        0,
+        secondLastPrice.search(",")
+      );
+      // Comparo precios
+      if (secondLastPrice == "0") return lastPrice;
+      return secondLastPrice;
     };
 
     // Utiliza Promise.all para hacer solicitudes concurrentes
