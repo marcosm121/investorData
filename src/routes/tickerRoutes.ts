@@ -10,6 +10,9 @@ router.get("/many", tickerController.getMany);
 // GET /manycsv - Obtiene todos los tickers con precios en formato csv
 router.get("/manycsv", tickerController.getManyCsv);
 
+// GET /manysave - Obtiene todos los tickers con precios y guarda snapshots
+router.get("/manysave", tickerController.manySave);
+
 // POST /add - Agrega un nuevo ticker
 router.post("/add", tickerController.addTicker);
 
