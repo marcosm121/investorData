@@ -13,6 +13,9 @@ router.get("/manycsv", tickerController.getManyCsv);
 // GET /manysave - Obtiene todos los tickers con precios y guarda snapshots
 router.get("/manysave", tickerController.manySave);
 
+// GET /manyhistory/:date - Retorna datos históricos para una fecha YYYY-MM-DD
+router.get("/manyhistory/:date", tickerController.manyHistory);
+
 // POST /add - Agrega un nuevo ticker
 router.post("/add", tickerController.addTicker);
 

@@ -110,6 +110,34 @@ export class TickerController {
   };
 
   /**
+   * GET /manyhistory/:date - Retorna datos históricos para una fecha (YYYY-MM-DD)
+   */
+  manyHistory = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { date } = req.params;
+
+      // Validate date format
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        res.status(400).json({
+          error: 'Formato de fecha inválido',
+          message: 'Usar formato YYYY-MM-DD, ej: 2026-03-15',
+        });
+        return;
+      }
+
+      const tickers = await this.tickerService.getAllTickers();
+      const result = await this.snapshotService.getSnapshotsForDate(date, tickers);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error('Error en manyHistory:', error);
+      res.status(500).json({
+        error: 'Error interno del servidor',
+        message: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  };
+
+  /**
    * POST /add - Agrega un nuevo ticker
    */
   addTicker = async (req: Request, res: Response): Promise<void> => {
