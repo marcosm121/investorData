@@ -40,7 +40,6 @@ export class TickerController {
   }
 
   /**
-  /**
    * GET /many - Obtiene todos los tickers con precios aleatorios
    */
   getMany = async (req: Request, res: Response): Promise<void> => {
