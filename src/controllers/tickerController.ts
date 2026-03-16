@@ -2,16 +2,19 @@ import { Request, Response } from "express";
 import { TickerService } from "../services/tickerService";
 import { RavaScrapper } from "../services/ravaScrapper";
 import { DolarAPI } from "../services/dolarApi";
+import { SnapshotService } from "../services/snapshotService";
 
 export class TickerController {
   private tickerService: TickerService;
   private ravaScrapper: RavaScrapper;
   private dolarAPI: DolarAPI;
+  private snapshotService: SnapshotService;
 
   constructor() {
     this.tickerService = new TickerService();
     this.ravaScrapper = new RavaScrapper();
     this.dolarAPI = new DolarAPI();
+    this.snapshotService = new SnapshotService();
   }
 
   /**
@@ -36,7 +39,6 @@ export class TickerController {
     return resultado;
   }
 
-  /**
   /**
    * GET /many - Obtiene todos los tickers con precios aleatorios
    */
@@ -81,6 +83,55 @@ export class TickerController {
       res.status(500).json({
         error: "Error interno del servidor",
         message: error instanceof Error ? error.message : "Error desconocido",
+      });
+    }
+  };
+
+  /**
+   * GET /manysave - Igual que /many pero guarda snapshots en MongoDB
+   */
+  manySave = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tickers = await this.tickerService.getAllTickers();
+      const [prices, dolares] = await Promise.all([
+        this.ravaScrapper.getMany(tickers),
+        this.dolarAPI.getDolares(['oficial', 'blue', 'bolsa', 'contadoconliqui']),
+      ]);
+      await this.snapshotService.saveSnapshots(tickers, prices, dolares);
+      res.status(200).json({ ...prices, ...dolares });
+    } catch (error) {
+      console.error('Error en manySave:', error);
+      res.status(500).json({
+        error: 'Error interno del servidor',
+        message: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  };
+
+  /**
+   * GET /manyhistory/:date - Retorna datos históricos para una fecha (YYYY-MM-DD)
+   */
+  manyHistory = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { date } = req.params;
+
+      // Validate date format
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        res.status(400).json({
+          error: 'Formato de fecha inválido',
+          message: 'Usar formato YYYY-MM-DD, ej: 2026-03-15',
+        });
+        return;
+      }
+
+      const tickers = await this.tickerService.getAllTickers();
+      const result = await this.snapshotService.getSnapshotsForDate(date, tickers);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error('Error en manyHistory:', error);
+      res.status(500).json({
+        error: 'Error interno del servidor',
+        message: error instanceof Error ? error.message : 'Error desconocido',
       });
     }
   };
