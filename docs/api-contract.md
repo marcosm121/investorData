@@ -13,9 +13,9 @@ Retorna los precios actuales de todos los tickers y el tipo de cambio del dólar
 **Response `200`**
 ```json
 {
-  "GGAL":  1234.56,
-  "YPF":   8900.00,
-  "PAMP":  3200.50,
+  "GGAL":  "1234.56",
+  "YPF":   "8900.00",
+  "PAMP":  "3200.50",
   "oficial":         1180.50,
   "blue":            1350.00,
   "bolsa":           1290.75,
@@ -23,9 +23,11 @@ Retorna los precios actuales de todos los tickers y el tipo de cambio del dólar
 }
 ```
 
-- Las claves de tickers son strings en mayúsculas (`string → number`).
-- `oficial`, `blue`, `bolsa`, `contadoconliqui` son siempre los últimos cuatro campos.
+- Los valores de tickers son **strings** (vienen directo del scraper sin parsear).
+- Las tasas de dólar (`oficial`, `blue`, `bolsa`, `contadoconliqui`) son **numbers**.
 - Los valores de dólar son el promedio de compra/venta, redondeados a 2 decimales.
+
+> Para recibir todos los valores como `number`, usar `/manyall`.
 
 ---
 
