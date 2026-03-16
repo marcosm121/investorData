@@ -1,0 +1,14 @@
+name: Daily Snapshot
+
+on:
+  schedule:
+    - cron: '0 20 * * *' # 17:00 GMT-3 = 20:00 UTC
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger manysave
+        run: |
+          curl -f -s -o /dev/null -w "%{http_code}" https://investordata.onrender.com/manysave
