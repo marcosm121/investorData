@@ -88,6 +88,35 @@ export class TickerController {
   };
 
   /**
+   * GET /manyall - Retorna precios en ARS y USD (bolsa) para todos los tickers
+   */
+  manyAll = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tickers = await this.tickerService.getAllTickers();
+      const [prices, dolares] = await Promise.all([
+        this.ravaScrapper.getMany(tickers),
+        this.dolarAPI.getDolares(['oficial', 'blue', 'bolsa', 'contadoconliqui']),
+      ]);
+      const bolsa = dolares['bolsa'] || 0;
+      const result: Record<string, { ars: number; usd: number }> = {};
+      for (const ticker of tickers) {
+        const ars = parseFloat(prices[ticker]) || 0;
+        result[ticker] = {
+          ars,
+          usd: bolsa > 0 ? parseFloat((ars / bolsa).toFixed(4)) : 0,
+        };
+      }
+      res.status(200).json({ ...result, ...dolares });
+    } catch (error) {
+      console.error('Error en manyAll:', error);
+      res.status(500).json({
+        error: 'Error interno del servidor',
+        message: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  };
+
+  /**
    * GET /manysave - Igual que /many pero guarda snapshots en MongoDB
    */
   manySave = async (req: Request, res: Response): Promise<void> => {

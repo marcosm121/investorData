@@ -44,7 +44,7 @@ export class SnapshotService {
   async getSnapshotsForDate(
     date: string,   // YYYY-MM-DD (treated as UTC day)
     tickers: string[]
-  ): Promise<Record<string, number | null>> {
+  ): Promise<Record<string, { ars: number | null; usd: number | null } | number | null>> {
     const start = new Date(`${date}T00:00:00.000Z`);
     const end   = new Date(`${date}T23:59:59.999Z`);
 
@@ -60,10 +60,10 @@ export class SnapshotService {
     ]);
 
     // Take the latest snapshot per ticker (array is already sorted desc)
-    const result: Record<string, number | null> = {};
+    const result: Record<string, { ars: number | null; usd: number | null } | number | null> = {};
     for (const ticker of tickers) {
       const snap = priceSnapshots.find(s => s.symbol === ticker);
-      result[ticker] = snap ? snap.price : null;
+      result[ticker] = snap ? { ars: snap.price, usd: snap.priceMep } : { ars: null, usd: null };
     }
 
     result['oficial']         = dollarSnapshot?.oficial         ?? null;

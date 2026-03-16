@@ -34,20 +34,21 @@ Removes a ticker from the database.
 }
 ```
 
+### GET /manyall
+Same as `/many` but tickers return `{ ars: number, usd: number }` instead of a flat number. Dollar rates remain flat numbers. `usd = ars / bolsa`, rounded to 4 decimals.
+
 ### GET /manysave
 Same as `/many` + persists `PriceSnapshot` (one per ticker) and one `DollarSnapshot` to MongoDB.
-
-**Response:** Array of ticker objects with current price data and exchange rates.
 
 **Side effects:** Saves snapshots for price history tracking.
 
 ### GET /manyhistory/:date
-Returns price and rate data for a given date in the same format as `/many`.
+Returns historical price data for a given date in the same format as `/manyall`.
 
 **Parameters:**
 - `date` (path parameter) — Date in `YYYY-MM-DD` format (UTC)
 
-**Response:** Array of ticker objects with historical price data for the specified date. Returns `null` for tickers or rates with no data on that date.
+**Response:** Tickers return `{ ars: number | null, usd: number | null }`. Dollar rates return flat numbers or `null` if no data for that date.
 
 ## Snapshot Persistence
 
