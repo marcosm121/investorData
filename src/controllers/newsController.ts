@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import { fetchAllNews } from '../services/newsService';
+import { fetchAllNews, NewsArticle } from '../services/newsService';
 import { selectTopArticles, summarizeArticle } from '../services/groqService';
 import { fetchArticleContent } from '../services/jinaService';
-import { NewsArticle } from '../services/newsService';
 
 const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
@@ -17,7 +16,7 @@ export class NewsController {
   getNews = async (req: Request, res: Response): Promise<void> => {
     try {
       if (cache && Date.now() - cache.cachedAt < CACHE_TTL_MS) {
-        res.status(200).json(cache.articles);
+        res.status(200).json(cache.articles.map(({ description: _desc, ...rest }) => rest));
         return;
       }
 
@@ -34,7 +33,7 @@ export class NewsController {
       );
 
       cache = { articles: enriched, cachedAt: Date.now() };
-      res.status(200).json(enriched);
+      res.status(200).json(enriched.map(({ description: _desc, ...rest }) => rest));
     } catch (error) {
       console.error('Error en getNews:', error);
       res.status(500).json({
