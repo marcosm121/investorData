@@ -37,3 +37,24 @@ export async function selectTopArticles(articles: NewsArticle[]): Promise<NewsAr
     .slice(0, 5)
     .map(i => articles[i]);
 }
+
+export async function summarizeArticle(article: NewsArticle, content: string): Promise<string> {
+  const prompt = `Dado el siguiente contenido de un artículo periodístico, escribí un resumen conciso en español en formato markdown (máximo 150 palabras). Usá un título H3 y 2-3 párrafos breves.\n\nTítulo: ${article.title}\nContenido: ${content}`;
+
+  const response = await axios.post(
+    GROQ_URL,
+    {
+      model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  return response.data.choices[0].message.content.trim();
+}
