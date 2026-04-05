@@ -37,3 +37,27 @@ export async function selectTopArticles(articles: NewsArticle[]): Promise<NewsAr
     .slice(0, 5)
     .map(i => articles[i]);
 }
+
+export async function summarizeArticle(article: NewsArticle, content: string): Promise<string> {
+  const safeContent = content.slice(0, 3000);
+  const prompt = `Dado el siguiente contenido de un artículo periodístico, escribí un resumen conciso en español en formato markdown (máximo 150 palabras). Usá un título H3 y 2-3 párrafos breves.\n\nTítulo: ${article.title}\nContenido: ${safeContent}`;
+
+  const response = await axios.post(
+    GROQ_URL,
+    {
+      model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  const choices = response.data?.choices;
+  if (!choices?.length) throw new Error(`Groq summarizeArticle returned no choices for: ${article.title}`);
+  return choices[0].message.content.trim();
+}

@@ -54,10 +54,15 @@ Returns 5 curated news articles selected by LLM as most relevant for an Argentin
     "url": "string",
     "source": "string",
     "publishedAt": "ISO 8601 string",
-    "category": "global | argentina | geopolitics | watchlist"
+    "category": "global | argentina | geopolitics | watchlist",
+    "summary": "markdown string (H3 + 2-3 paragraphs, max ~150 words)"
   }
 ]
 ```
+
+**Blacklists:**
+- Source blacklist (filtered before LLM selection): `Yahoo Entertainment`
+- Jina domain blacklist (skips content extraction): `apnews.com`
 
 **Implementation:** Fetches ~40 articles from NewsAPI across 4 categories in parallel, deduplicates by URL, passes titles to Groq LLM to select top 5 indices.
 
