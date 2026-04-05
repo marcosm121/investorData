@@ -32,14 +32,14 @@ async function fetchCategory(params: Record<string, string>, category: Category)
 }
 
 export async function fetchAllNews(): Promise<NewsArticle[]> {
-  const [global, argentina, geopolitics, watchlist] = await Promise.all([
+  const [globalNews, argentina, geopolitics, watchlist] = await Promise.all([
     fetchCategory({ endpoint: '/top-headlines', category: 'business', language: 'en' }, 'global'),
     fetchCategory({ q: 'mercado argentino acciones bolsa', language: 'es' }, 'argentina'),
     fetchCategory({ q: 'geopolitics war diplomacy sanctions', language: 'en' }, 'geopolitics'),
     fetchCategory({ q: 'YPF OR "Banco Galicia" OR Apple OR "S&P 500"' }, 'watchlist'),
   ]);
 
-  const all = [...global, ...argentina, ...geopolitics, ...watchlist];
+  const all = [...globalNews, ...argentina, ...geopolitics, ...watchlist];
 
   // Deduplicate by URL
   const seen = new Set<string>();
