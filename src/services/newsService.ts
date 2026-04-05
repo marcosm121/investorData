@@ -31,12 +31,19 @@ async function fetchCategory(params: Record<string, string>, category: Category)
   }));
 }
 
+function getFromDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  return d.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
 export async function fetchAllNews(): Promise<NewsArticle[]> {
+  const from = getFromDate();
   const results = await Promise.allSettled([
     fetchCategory({ endpoint: '/top-headlines', category: 'business', language: 'en' }, 'global'),
-    fetchCategory({ q: 'mercado argentino acciones bolsa', language: 'es' }, 'argentina'),
-    fetchCategory({ q: 'geopolitics war diplomacy sanctions', language: 'en' }, 'geopolitics'),
-    fetchCategory({ q: 'YPF OR "Banco Galicia" OR Apple OR "S&P 500"' }, 'watchlist'),
+    fetchCategory({ q: 'mercado argentino acciones bolsa', language: 'es', from }, 'argentina'),
+    fetchCategory({ q: 'geopolitics war diplomacy sanctions', language: 'en', from }, 'geopolitics'),
+    fetchCategory({ q: 'YPF OR "Banco Galicia" OR Apple OR "S&P 500"', from }, 'watchlist'),
   ]);
 
   const all = results.flatMap(r => {

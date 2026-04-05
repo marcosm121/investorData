@@ -27,7 +27,10 @@ router.post("/add", tickerController.addTicker);
 // POST /remove - Remueve un ticker
 router.post("/remove", tickerController.removeTicker);
 
-// GET /news - Obtiene noticias curadas por LLM
+// GET /news - Obtiene noticias curadas por LLM (cacheado 2hs)
 router.get("/news", newsController.getNews);
+
+// GET /resetnews - Limpia la caché de noticias
+router.get("/resetnews", newsController.resetNews);
 
 export default router;
