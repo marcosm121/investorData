@@ -32,7 +32,7 @@ export async function selectTopArticles(articles: NewsArticle[]): Promise<NewsAr
   if (!match) throw new Error(`Groq returned unexpected format: ${content}`);
 
   const indices: number[] = JSON.parse(match[0]);
-  return indices
+  return [...new Set(indices)]
     .filter(i => i >= 0 && i < articles.length)
     .slice(0, 5)
     .map(i => articles[i]);
