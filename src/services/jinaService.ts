@@ -15,8 +15,11 @@ function getDomain(url: string): string {
   }
 }
 
+const BLOCK_PHRASES = ['anonymous access', 'access denied', 'enable javascript', '403 forbidden'];
+
 function isBlocked(content: string): boolean {
-  return content.toLowerCase().includes('blocked') || content.length < MIN_CONTENT_LENGTH;
+  const lower = content.toLowerCase();
+  return BLOCK_PHRASES.some(p => lower.includes(p)) || content.length < MIN_CONTENT_LENGTH;
 }
 
 export async function fetchArticleContent(article: NewsArticle): Promise<string> {
