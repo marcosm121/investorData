@@ -9,6 +9,7 @@ export class NewsController {
   getNews = async (req: Request, res: Response): Promise<void> => {
     try {
       const articles = await fetchAllNews();
+      if (articles.length === 0) throw new Error('No se pudieron obtener artículos de NewsAPI');
       const top = await selectTopArticles(articles);
       res.status(200).json(top);
     } catch (error) {

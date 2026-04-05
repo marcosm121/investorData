@@ -32,19 +32,25 @@ async function fetchCategory(params: Record<string, string>, category: Category)
 }
 
 export async function fetchAllNews(): Promise<NewsArticle[]> {
-  const [globalNews, argentina, geopolitics, watchlist] = await Promise.all([
+  const results = await Promise.allSettled([
     fetchCategory({ endpoint: '/top-headlines', category: 'business', language: 'en' }, 'global'),
     fetchCategory({ q: 'mercado argentino acciones bolsa', language: 'es' }, 'argentina'),
     fetchCategory({ q: 'geopolitics war diplomacy sanctions', language: 'en' }, 'geopolitics'),
     fetchCategory({ q: 'YPF OR "Banco Galicia" OR Apple OR "S&P 500"' }, 'watchlist'),
   ]);
 
-  const all = [...globalNews, ...argentina, ...geopolitics, ...watchlist];
+  const all = results.flatMap(r => {
+    if (r.status === 'rejected') {
+      console.error('NewsAPI category fetch failed:', r.reason);
+      return [];
+    }
+    return r.value;
+  });
 
-  // Deduplicate by URL
+  // Deduplicate by URL, filter out articles with null titles
   const seen = new Set<string>();
   return all.filter(article => {
-    if (!article.url || seen.has(article.url)) return false;
+    if (!article.title || !article.url || seen.has(article.url)) return false;
     seen.add(article.url);
     return true;
   });
