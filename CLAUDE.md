@@ -42,6 +42,29 @@ Same as `/many` + persists `PriceSnapshot` (one per ticker) and one `DollarSnaps
 
 **Side effects:** Saves snapshots for price history tracking.
 
+### GET /news
+Returns 5 curated news articles selected by LLM as most relevant for an Argentine investor.
+
+**Response:** Array of 5 article objects.
+
+```json
+[
+  {
+    "title": "string",
+    "url": "string",
+    "source": "string",
+    "publishedAt": "ISO 8601 string",
+    "category": "global | argentina | geopolitics | watchlist"
+  }
+]
+```
+
+**Implementation:** Fetches ~40 articles from NewsAPI across 4 categories in parallel, deduplicates by URL, passes titles to Groq LLM to select top 5 indices.
+
+**Required env vars:** `NEWS_API_KEY`, `GROQ_API_KEY`, `GROQ_MODEL` (default: `llama-3.3-70b-versatile`)
+
+**Watchlist (hardcoded PoC):** YPF, Banco Galicia, Apple, S&P 500
+
 ### GET /manyhistory/:date
 Returns historical price data for a given date in the same format as `/manyall`.
 
