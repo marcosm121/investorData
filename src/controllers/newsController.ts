@@ -3,6 +3,9 @@ import { fetchAllNews } from '../services/newsService';
 import { selectTopArticles } from '../services/groqService';
 
 export class NewsController {
+  /**
+   * GET /news - Retorna las 5 noticias más relevantes seleccionadas por LLM
+   */
   getNews = async (req: Request, res: Response): Promise<void> => {
     try {
       const articles = await fetchAllNews();
