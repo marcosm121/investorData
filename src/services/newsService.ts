@@ -6,10 +6,12 @@ export interface NewsArticle {
   source: string;
   publishedAt: string;
   category: 'global' | 'argentina' | 'geopolitics' | 'watchlist';
+  description: string;
 }
 
 const BASE_URL = 'https://newsapi.org/v2';
 const API_KEY = process.env.NEWS_API_KEY;
+const SOURCE_BLACKLIST = ['Yahoo Entertainment'];
 
 type Category = NewsArticle['category'];
 
@@ -27,6 +29,7 @@ async function fetchCategory(params: Record<string, string>, category: Category)
     url: a.url,
     source: a.source?.name ?? '',
     publishedAt: a.publishedAt,
+    description: a.description ?? '',
     category,
   }));
 }
@@ -58,6 +61,7 @@ export async function fetchAllNews(): Promise<NewsArticle[]> {
   const seen = new Set<string>();
   return all.filter(article => {
     if (!article.title || !article.url || seen.has(article.url)) return false;
+    if (SOURCE_BLACKLIST.includes(article.source)) return false;
     seen.add(article.url);
     return true;
   });
