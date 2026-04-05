@@ -40,7 +40,7 @@ export async function selectTopArticles(articles: NewsArticle[]): Promise<NewsAr
 
 export async function summarizeArticle(article: NewsArticle, content: string): Promise<string> {
   const safeContent = content.slice(0, 3000);
-  const prompt = `Dado el siguiente contenido de un artículo periodístico, escribí un resumen conciso en español en formato markdown (máximo 150 palabras). Usá un título H3 y 2-3 párrafos breves.\n\nTítulo: ${article.title}\nContenido: ${safeContent}`;
+  const prompt = `Dado el siguiente contenido de un artículo periodístico, escribí un resumen en español en formato markdown (máximo 300 palabras). Usá un título H3 y 2-3 párrafos breves. Asegurate de mencionar las conclusiones más importantes del artículo.\n\nTítulo: ${article.title}\nContenido: ${safeContent}`;
 
   const response = await axios.post(
     GROQ_URL,
