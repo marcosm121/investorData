@@ -39,6 +39,15 @@ Backend en Node.js con TypeScript que expone endpoints para gestionar tickers de
    PORT=3000
    MONGODB_URI=mongodb://localhost:27017/investorData
    NODE_ENV=development
+
+   # NewsAPI + Groq (para GET /news)
+   NEWS_API_KEY=...
+   GROQ_API_KEY=...
+   GROQ_MODEL=llama-3.3-70b-versatile
+
+   # Prompt Inventory (ver sección más abajo)
+   PROMPT_SERVER_URL=http://localhost:3001
+   PROMPT_API_KEY=...
    ```
 
 4. **Inicializar la base de datos**
@@ -140,6 +149,34 @@ Remueve un ticker de la base de datos.
 }
 ```
 
+### GET /news
+
+Devuelve 5 artículos de noticias curados por LLM, seleccionados como los más relevantes para un inversor argentino.
+
+**Respuesta:**
+```json
+[
+  {
+    "title": "string",
+    "url": "string",
+    "source": "string",
+    "publishedAt": "2024-01-01T00:00:00Z",
+    "category": "global | argentina | geopolitics | watchlist",
+    "summary": "### Título\n\nPárrafo 1...\n\nPárrafo 2..."
+  }
+]
+```
+
+**Flujo interno:**
+1. Fetcha ~40 artículos de NewsAPI en paralelo (4 categorías)
+2. Deduplica por URL y filtra fuentes en blacklist
+3. Pasa los títulos a Groq LLM para seleccionar los 5 índices más relevantes
+4. Para cada artículo seleccionado, extrae el contenido con Jina y genera un resumen en markdown vía Groq
+
+**Variables de entorno requeridas:** `NEWS_API_KEY`, `GROQ_API_KEY`, `PROMPT_SERVER_URL`, `PROMPT_API_KEY`
+
+---
+
 ### GET /health
 Verifica el estado del servidor.
 
@@ -239,6 +276,32 @@ Cambia el puerto en el archivo `.env`:
 ```
 PORT=3001
 ```
+
+## Integración con Prompt Inventory
+
+Los prompts que usa el endpoint `/news` para interactuar con el LLM no están hardcodeados en el código: se consumen en runtime desde [Prompt Inventory](https://github.com/marcosm121/Prompt-Inventory), un servidor dedicado que permite editar prompts sin necesidad de redeploy.
+
+### Prompts utilizados
+
+| Slug | Función |
+|------|---------|
+| `seleccion-de-articulos` | Instruye al LLM a elegir los 5 índices más relevantes de una lista de titulares |
+| `resumen-de-articulo` | Instruye al LLM a generar un resumen en markdown de un artículo |
+
+El contenido dinámico (lista de títulos, texto del artículo) se appendea al final del prompt en runtime.
+
+### Configuración
+
+Levantá una instancia de [Prompt Inventory](https://github.com/marcosm121/Prompt-Inventory) y configurá las variables en `.env`:
+
+```
+PROMPT_SERVER_URL=http://localhost:3001   # URL del servidor de Prompt Inventory
+PROMPT_API_KEY=tu-api-key-secreta         # Debe coincidir con API_KEY en Prompt Inventory
+```
+
+Luego creá los dos prompts desde la UI de Prompt Inventory usando los slugs `seleccion-de-articulos` y `resumen-de-articulo`.
+
+---
 
 ## 📝 Notas
 
