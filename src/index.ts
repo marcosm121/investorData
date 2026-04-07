@@ -54,7 +54,7 @@ const startServer = async () => {
   try {
     // Conectar a la base de datos
     await connectDatabase();
-    
+
     // Iniciar servidor
     app.listen(PORT, () => {
       console.log(`🚀 Servidor iniciado en http://localhost:${PORT}`);
