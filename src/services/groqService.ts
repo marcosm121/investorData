@@ -3,12 +3,21 @@ import { NewsArticle } from './newsService';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
+async function fetchPrompt(slug: string): Promise<string> {
+  const res = await fetch(`${process.env.PROMPT_SERVER_URL}/api/prompts/${slug}`, {
+    headers: { 'x-api-key': process.env.PROMPT_API_KEY ?? '' },
+  });
+  if (!res.ok) throw new Error(`Failed to fetch prompt "${slug}": ${res.status} ${res.statusText}`);
+  return res.text();
+}
+
 export async function selectTopArticles(articles: NewsArticle[]): Promise<NewsArticle[]> {
   const numbered = articles
     .map((a, i) => `${i}. [${a.category}] ${a.title}`)
     .join('\n');
 
-  const prompt = `Sos un analista financiero. Dado el siguiente listado de noticias, seleccioná los 5 índices más relevantes para un inversor argentino. Respondé únicamente con un array JSON de enteros, sin texto adicional. Ejemplo: [2, 7, 15, 23, 31]\n\n${numbered}`;
+  const basePrompt = await fetchPrompt('seleccion-de-articulos');
+  const prompt = `${basePrompt}\n\n${numbered}`;
 
   const response = await axios.post(
     GROQ_URL,
@@ -40,7 +49,8 @@ export async function selectTopArticles(articles: NewsArticle[]): Promise<NewsAr
 
 export async function summarizeArticle(article: NewsArticle, content: string): Promise<string> {
   const safeContent = content.slice(0, 3000);
-  const prompt = `Dado el siguiente contenido de un artículo periodístico, escribí un resumen en español en formato markdown (máximo 300 palabras). Usá un título H3 y 2-3 párrafos breves. Asegurate de mencionar las conclusiones más importantes del artículo.\n\nTítulo: ${article.title}\nContenido: ${safeContent}`;
+  const basePrompt = await fetchPrompt('resumen-de-articulo');
+  const prompt = `${basePrompt}\n\nTítulo: ${article.title}\nContenido: ${safeContent}`;
 
   const response = await axios.post(
     GROQ_URL,
