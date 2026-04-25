@@ -2,14 +2,14 @@ import axios from "axios";
 
 export class RavaScrapper {
   async getPrice(ticker: string) {
-    const expresion = "ultimo&quot;:";
+    const expresion = 'ultimo":';
     try {
       const data = await axios
         .get("https://www.rava.com/perfil/" + ticker)
         .then(function (response) {
           let res = response.data.toString();
           let pos = res.search(expresion);
-          res = res.substring(pos + 13, pos + 22);
+          res = res.substring(pos + 8, pos + 17);
           res = res.substring(0, res.search(","));
           return res;
         });
@@ -21,7 +21,7 @@ export class RavaScrapper {
   }
 
   async getMany(tickers: string[]) {
-    const expresion = "ultimo&quot;:";
+    const expresion = 'ultimo":';
     let prices: any = {};
     console.log(tickers);
 
@@ -35,14 +35,14 @@ export class RavaScrapper {
       // Calculo ultimo precio
       const lastPos = res.lastIndexOf(expresion);
       if (lastPos === -1) return "0";
-      let lastPrice = res.substring(lastPos + 13, lastPos + 22);
+      let lastPrice = res.substring(lastPos + 8, lastPos + 17);
       lastPrice = lastPrice.substring(0, lastPrice.search(","));
       // Calculo penultimo precio
       const secondLastPos = res.lastIndexOf(expresion, lastPos - 1);
       if (secondLastPos === -1) return lastPrice;
       let secondLastPrice = res.substring(
-        secondLastPos + 13,
-        secondLastPos + 22
+        secondLastPos + 8,
+        secondLastPos + 17
       );
       secondLastPrice = secondLastPrice.substring(
         0,
